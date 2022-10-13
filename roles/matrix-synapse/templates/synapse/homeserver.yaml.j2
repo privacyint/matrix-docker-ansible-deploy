@@ -864,6 +864,10 @@ database:
     port: {{ matrix_synapse_database_port }}
     cp_min: 5
     cp_max: 10
+    {% if matrix_synapse_database_ssl_enabled %}
+    sslmode: "{{ matrix_synapse_database_ssl_sslmode | string|to_json }}"
+    sslrootcert: "/data/certs/ca.crt.pem"
+    {% endif %}
 
 
 ## Logging ##
