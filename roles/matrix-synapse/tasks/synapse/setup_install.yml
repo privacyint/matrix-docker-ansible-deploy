@@ -97,6 +97,28 @@
     owner: "{{ matrix_user_username }}"
     group: "{{ matrix_user_groupname }}"
 
+- name: Ensure the certificate directory exists
+  ansible.builtin.file:
+    path: "{{ matrix_synapse_config_dir_path }}/certs/"
+    state: directory
+    mode: 0644
+    owner: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
+  when: "matrix_synapse_database_ssl_enabled"
+
+- name: Download the CA's root certificate, as provided
+  ansible.builtin.get_url:
+    url: "{{ matrix_synapse_database_ssl_sslrootcert_download_url }}"
+    dest: "{{ matrix_synapse_config_dir_path }}/certs/ca.crt.pem"
+    force: true
+    mode: 0440
+    owner: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
+  register: result
+  retries: "{{ matrix_geturl_retries_count }}"
+  delay: "{{ matrix_geturl_retries_delay }}"
+  until: result is not failed
+
 - name: Ensure Synapse log config installed
   ansible.builtin.template:
     src: "{{ matrix_synapse_template_synapse_log }}"
